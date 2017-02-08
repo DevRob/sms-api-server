@@ -1,0 +1,22 @@
+{
+  "name": "Ordorite_api_server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "knex": "^0.12.6",
+    "mysql": "^2.12.0",
+    "request": "^2.79.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  },
+  "scripts": {
+    "dev": "nodemon server",
+    "start": "node server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["node", "sms", "mySql"],
+  "author": "Robert Molnar"
+}
