@@ -46,9 +46,7 @@ function sendSMS(id, destination, sender, SMSbody) {
   msgDetails.sourceAddress = sender
   msgDetails.messageBody = SMSbody
 
-  console.log(buildURL(msgDetails));
   request.get(buildURL(msgDetails), (err, res, body) => {
-    APIresponseHandler.logAPIresponse(id, body)
     APIresponseHandler.handleAPIresponse(id, body)
   })
 }

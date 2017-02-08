@@ -38,3 +38,6 @@ jspm_packages
 
 # Old version files
 archive
+
+# Test file
+test.js

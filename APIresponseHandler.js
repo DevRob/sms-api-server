@@ -1,63 +1,61 @@
 const config = require('./config')
 const db = config.db
+var retryCount = config.serverConfig.reSendCap
 
-function APIresultCode(body) {
+function getAPIresultCode(body) {
   // returns error code or 0 if no error. Example: body = "ERR -25" => 25
   var pattern = /(-\d+)/
   return pattern.test(body) ? - Number(pattern.exec(body)[0]) : 0
 }
 
 function logAPIresponse(id, result) {
-  db('system_sms_api_response_log')
+  db(config.tables.sms_api_log)
   .insert({
     smsID: id,
     APIresponse: result,
-    responseCode: APIresultCode(result),
-    responseMessage: config.APImessages[APIresultCode(result)]
+    responseCode: getAPIresultCode(result),
+    responseMessage: config.APImessages[getAPIresultCode(result)]
   })
   .then()
 }
 
 function handleAPIresponse(id, result) {
-  var responseCode = APIresultCode(result)
+  var responseCode = getAPIresultCode(result)
 
   switch(responseCode) {
     case 0:
-      logSuccess(smsID) // @TODO: Success msg to user
+      logSuccess(smsID, result)
+      // @TODO: Success msg to user
       break
     case 5:
-      // logOnHold(smsID, result)
-      SMSretrySend(smsID, result)
-      // @TODO: Top-up msg to Admin
-      break
     case 10:
-      SMSretrySend(smsID, result)
-      // @TODO: Check Setup details msg to Admin
-      break
     case 15:
-      SMSretrySend(smsID, result)
-      // @TODO: Check destination msg to user
+    case 25:
+      logOnHold(smsID, result)
+      // ERR 5 @TODO: Top-up msg to Admin
+      // ERR 10 @TODO: Check Setup details msg to Admin
+      // ERR 15 @TODO: Check destination msg to user
+      // ERR 25 @TODO: Check parameters
       break
     case 20:
-      SMSretrySend(smsID, result)
-      // @TODO: Retry and send System ERR msg to user after ?10 retry
-      break
-    case 25:
-      SMSretrySend(smsID, result)
-      // @TODO: Check parameters
+      retrySend(smsID, result)
+      // ERR 20 @TODO: Retry and send System ERR msg to
+      // user after number of retry set in config file.
       break
     default:
-        console.log("unexpected result Please contact Administrator")
+      logOnHold(smsID, "ERR -999 Unexpected Error.")
+      console.log("Unexpected Error. Please contact Administrator.")
   }
 }
 
-function logSuccess(smsID) {
+function logSuccess(smsID, result) {
   db(config.tables.sms_queue)
   .where('id', '=', smsID)
   .update({
     delivered: 1
   })
   .then(() => {
+    logAPIresponse(smsID, result)
     console.log("SMS sent and logged in DB");
   })
 }
@@ -69,16 +67,18 @@ function logOnHold(smsID, result) {
     delivered: 2
   })
   .then(() => {
-    console.log("SMS sending failed and put onhold", "err: ", result);
+    logAPIresponse(smsID, result)
+    console.log("SMS sending failed and put onhold.", "response: ", result);
   })
 }
 
-function SMSretrySend(smsID, result) {
+function retrySend(smsID, result) {
   db(config.tables.sms_api_log)
   .where('smsID', '=', smsID)
   .then((query) => {
-    if (query.length < 3) {
-      console.log("SMS sending failed, retrying");
+    if (query.length < retryCount) {
+      logAPIresponse(smsID, result)
+      console.log("SMS sending failed, retrying...");
     } else {
       logOnHold(smsID, result)
     }
@@ -86,6 +86,5 @@ function SMSretrySend(smsID, result) {
 }
 
 module.exports = {
-  handleAPIresponse: handleAPIresponse,
-  logAPIresponse: logAPIresponse
+  handleAPIresponse: handleAPIresponse
 }
