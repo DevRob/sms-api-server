@@ -39,6 +39,9 @@ function processQueuedSMS() {
       sendSMS(smsID, destination, sender, body)
     }
   })
+  .catch(function(e) {
+    console.error(e);
+  })
 }
 
 function sendSMS(id, destination, sender, SMSbody) {
