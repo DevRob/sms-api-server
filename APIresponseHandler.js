@@ -17,6 +17,9 @@ function logAPIresponse(id, result) {
     responseMessage: config.APImessages[getAPIresultCode(result)]
   })
   .then()
+  .catch(function(e) {
+    console.error(e);
+  })
 }
 
 function handleAPIresponse(id, result) {
@@ -58,6 +61,9 @@ function logSuccess(smsID, result) {
     logAPIresponse(smsID, result)
     console.log("SMS sent and logged in DB");
   })
+  .catch(function(e) {
+    console.error(e);
+  })
 }
 
 function logOnHold(smsID, result) {
@@ -69,6 +75,9 @@ function logOnHold(smsID, result) {
   .then(() => {
     logAPIresponse(smsID, result)
     console.log("SMS sending failed and put onhold.", "response: ", result);
+  })
+  .catch(function(e) {
+    console.error(e);
   })
 }
 
@@ -82,6 +91,9 @@ function retrySend(smsID, result) {
     } else {
       logOnHold(smsID, result)
     }
+  })
+  .catch(function(e) {
+    console.error(e);
   })
 }
 
