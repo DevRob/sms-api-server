@@ -2,7 +2,7 @@ const request = require('request');
 const config = require('./config')
 const APIresponseHandler = require('./APIresponseHandler')
 const db = config.db
-
+const smsQueue = config.tables.sms_queue
 var msgDetails = {
   baseurl: config.clxAPIconfig.baseurl,
   username: config.clxAPIconfig.username,
@@ -27,7 +27,7 @@ function processQueuedSMS() {
       sender = "",
       body = ""
 
-  db(config.tables.sms_queue)
+  db(smsQueue)
   .where("delivered", 0)
   .then((smsListQuery) => {
     for (var smsidx in smsListQuery) {
@@ -40,7 +40,7 @@ function processQueuedSMS() {
     }
   })
   .catch(function(e) {
-    console.error(e);
+    console.error(e)
   })
 }
 
