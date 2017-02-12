@@ -1,15 +1,18 @@
 const config = require('./config')
 const db = config.db
+const smsQueue = config.tables.sms_queue
+const smsAPILog = config.tables.sms_api_log
 var retryCount = config.serverConfig.reSendCap
 
 function getAPIresultCode(body) {
   // returns error code or 0 if no error. Example: body = "ERR -25" => 25
-  var pattern = /(-\d+)/
-  return pattern.test(body) ? - Number(pattern.exec(body)[0]) : 0
+  var errPattern = /(-\d+)/
+  var okPattern = /(OK \d+)/
+  return errPattern.test(body) ? - Number(errPattern.exec(body)[0]) : okPattern.test(body) ? 0 : 999
 }
 
 function logAPIresponse(id, result) {
-  db(config.tables.sms_api_log)
+  db(smsAPILog)
   .insert({
     smsID: id,
     APIresponse: result,
@@ -18,7 +21,7 @@ function logAPIresponse(id, result) {
   })
   .then()
   .catch(function(e) {
-    console.error(e);
+    console.error(e)
   })
 }
 
@@ -48,52 +51,53 @@ function handleAPIresponse(id, result) {
     default:
       logOnHold(smsID, "ERR -999 Unexpected Error.")
       console.log("Unexpected Error. Please contact Administrator.")
+      // ERR 999 @TODO: Unexpected error msg to user.
   }
 }
 
 function logSuccess(smsID, result) {
-  db(config.tables.sms_queue)
+  db(smsQueue)
   .where('id', '=', smsID)
   .update({
     delivered: 1
   })
   .then(() => {
     logAPIresponse(smsID, result)
-    console.log("SMS sent and logged in DB");
+    console.log("SMS sent and logged in DB")
   })
   .catch(function(e) {
-    console.error(e);
+    console.error(e)
   })
 }
 
 function logOnHold(smsID, result) {
-  db(config.tables.sms_queue)
+  db(smsQueue)
   .where('id', '=', smsID)
   .update({
     delivered: 2
   })
   .then(() => {
     logAPIresponse(smsID, result)
-    console.log("SMS sending failed and put onhold.", "response: ", result);
+    console.log("SMS sending failed and put onhold.", "response: ", result)
   })
   .catch(function(e) {
-    console.error(e);
+    console.error(e)
   })
 }
 
 function retrySend(smsID, result) {
-  db(config.tables.sms_api_log)
+  db(smsAPILog)
   .where('smsID', '=', smsID)
   .then((query) => {
     if (query.length < retryCount) {
       logAPIresponse(smsID, result)
-      console.log("SMS sending failed, retrying...");
+      console.log("SMS sending failed, retrying...")
     } else {
       logOnHold(smsID, result)
     }
   })
   .catch(function(e) {
-    console.error(e);
+    console.error(e)
   })
 }
 
