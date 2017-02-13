@@ -59,7 +59,7 @@ function logSuccess(smsID, result) {
   db(smsQueue)
   .where('id', '=', smsID)
   .update({
-    delivered: 1
+    status: 1
   })
   .then(() => {
     logAPIresponse(smsID, result)
@@ -74,7 +74,7 @@ function logOnHold(smsID, result) {
   db(smsQueue)
   .where('id', '=', smsID)
   .update({
-    delivered: 2
+    status: 2
   })
   .then(() => {
     logAPIresponse(smsID, result)

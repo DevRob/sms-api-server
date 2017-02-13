@@ -28,7 +28,7 @@ function processQueuedSMS() {
       body = ""
 
   db(smsQueue)
-  .where("delivered", 0)
+  .where("status", 0)
   .then((smsListQuery) => {
     for (var smsidx in smsListQuery) {
       smsID =  smsListQuery[smsidx].id
