@@ -19,7 +19,7 @@ config = {
   clxAPIconfig : {
     baseurl: "http://sms1.mblox.com:9001/HTTPSMS?S=H",
     username: "goodsidebu1",
-    password: "12345" // pwd: tAgCob2i
+    password: "tAgCob2i" // pwd: tAgCob2i
   },
 
   serverConfig : {
