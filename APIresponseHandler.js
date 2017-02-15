@@ -15,7 +15,7 @@ function logAPIresponse(id, result) {
   db(smsAPILog)
   .insert({
     smsID: id,
-    APIresponse: result,
+    APIresponse: String(result).replace(/^\s+|\s+$/g, ''),
     responseCode: getAPIresultCode(result),
     responseMessage: config.APImessages[getAPIresultCode(result)]
   })
