@@ -12,17 +12,7 @@ var msgDetails = {
   messageBody: ""
 }
 
-function buildURL(msgDetails) {
-  var url = msgDetails.baseurl +
-    "&UN=" + msgDetails.username +
-    "&P=" + msgDetails.password +
-    "&DA=" + msgDetails.destinationAddress +
-    "&SA=" + msgDetails.sourceAddress +
-    "&M=" + msgDetails.messageBody
-  return url
-}
-
-function processQueuedSMS() {
+exports.processQueuedSMS = function() {
   var destination = "",
       sender = "",
       body = ""
@@ -54,4 +44,12 @@ function sendSMS(id, destination, sender, SMSbody) {
   })
 }
 
-module.exports = { processQueuedSMS: processQueuedSMS }
+function buildURL(msgDetails) {
+  var url = msgDetails.baseurl +
+    "&UN=" + msgDetails.username +
+    "&P=" + msgDetails.password +
+    "&DA=" + msgDetails.destinationAddress +
+    "&SA=" + msgDetails.sourceAddress +
+    "&M=" + msgDetails.messageBody
+  return url
+}

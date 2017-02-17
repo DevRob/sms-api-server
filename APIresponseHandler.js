@@ -4,28 +4,7 @@ const smsQueue = config.tables.sms_queue
 const smsAPILog = config.tables.sms_api_log
 var retryCount = config.serverConfig.reSendCap
 
-function getAPIresultCode(body) {
-  // returns error code or 0 if no error. Example: body = "ERR -25" => 25
-  var errPattern = /(-\d+)/
-  var okPattern = /(OK \d+)/
-  return errPattern.test(body) ? - Number(errPattern.exec(body)[0]) : okPattern.test(body) ? 0 : 999
-}
-
-function logAPIresponse(id, result) {
-  db(smsAPILog)
-  .insert({
-    smsID: id,
-    APIresponse: String(result).replace(/^\s+|\s+$/g, ''),
-    responseCode: getAPIresultCode(result),
-    responseMessage: config.APImessages[getAPIresultCode(result)]
-  })
-  .then()
-  .catch(function(e) {
-    console.error(e)
-  })
-}
-
-function handleAPIresponse(id, result) {
+exports.handleAPIresponse = function(id, result) {
   var responseCode = getAPIresultCode(result)
 
   switch(responseCode) {
@@ -53,6 +32,27 @@ function handleAPIresponse(id, result) {
       console.log("Unexpected Error. Please contact Administrator.")
       // ERR 999 @TODO: Unexpected error msg to user.
   }
+}
+
+function getAPIresultCode(body) {
+  // returns error code or 0 if no error. Example: body = "ERR -25" => 25
+  var errPattern = /(-\d+)/
+  var okPattern = /(OK \d+)/
+  return errPattern.test(body) ? - Number(errPattern.exec(body)[0]) : okPattern.test(body) ? 0 : 999
+}
+
+function logAPIresponse(id, result) {
+  db(smsAPILog)
+  .insert({
+    smsID: id,
+    APIresponse: String(result).replace(/^\s+|\s+$/g, ''),
+    responseCode: getAPIresultCode(result),
+    responseMessage: config.APImessages[getAPIresultCode(result)]
+  })
+  .then()
+  .catch(function(e) {
+    console.error(e)
+  })
 }
 
 function logSuccess(smsID, result) {
@@ -99,8 +99,4 @@ function retrySend(smsID, result) {
   .catch(function(e) {
     console.error(e)
   })
-}
-
-module.exports = {
-  handleAPIresponse: handleAPIresponse
 }
