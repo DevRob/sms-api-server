@@ -3,7 +3,7 @@ const db = config.db
 const smsQueue = config.tables.sms_queue
 const smsAPILog = config.tables.sms_api_log
 
-function testDatabaseConnect(callback) {
+exports.testDatabaseConnect = function(callback) {
   var errors = 0
   console.log("Testing database connection.")
   db(smsQueue)
@@ -35,5 +35,3 @@ function testDatabaseConnect(callback) {
     }
   })
 }
-
-module.exports = { testDatabaseConnect: testDatabaseConnect }
