@@ -85,27 +85,27 @@ function logOnHold(smsID, result) {
   })
 }
 
-function logResult(smsID, result) {
-  var messages = {
-    0: "SMS sent and logged in DB",
-    1: "SMS sending failed and put onhold. Response: " + result
-  }
-  var responseCode = getAPIresultCode(result)
-  var statusCode = responseCode == 0 ? 1 : 2
-
-  db(smsQueue)
-  .where('id', '=', smsID)
-  .update({
-    status: statusCode
-  })
-  .then(() => {
-    logAPIresponse(smsID, result)
-    console.log(serverMessage[statusCode])
-  })
-  .catch(function(e) {
-    console.error(e)
-  })
-}
+// function logResult(smsID, result) {
+//   var messages = {
+//     0: "SMS sent and logged in DB",
+//     1: "SMS sending failed and put onhold. Response: " + result
+//   }
+//   var responseCode = getAPIresultCode(result)
+//   var statusCode = responseCode == 0 ? 1 : 2
+//
+//   db(smsQueue)
+//   .where('id', '=', smsID)
+//   .update({
+//     status: statusCode
+//   })
+//   .then(() => {
+//     logAPIresponse(smsID, result)
+//     console.log(serverMessage[statusCode])
+//   })
+//   .catch(function(e) {
+//     console.error(e)
+//   })
+// }
 
 function retrySend(smsID, result) {
   db(smsAPILog)
