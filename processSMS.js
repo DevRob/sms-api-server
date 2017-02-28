@@ -29,8 +29,8 @@ exports.processQueuedSMS = function() {
       sendSMS(smsID, destination, sender, body)
     }
   })
-  .catch(function(e) {
-    console.error(e)
+  .catch(function(err) {
+    console.error(err)
   })
 }
 
